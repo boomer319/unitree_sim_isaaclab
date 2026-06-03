@@ -1,0 +1,45 @@
+services:
+  unitree-isaac-sim:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: unitree-isaac-sim
+    network_mode: "host"
+    ipc: host
+
+    environment:
+      ACCEPT_EULA: "Y"
+      PRIVACY_CONSENT: "Y"
+      OMNI_KIT_ACCEPT_EULA: "Y"
+      ISAACSIM_ACCEPT_EULA: "Y"
+      PYTHONUNBUFFERED: "1"
+
+    volumes:
+      - /data/world_action_models/isaac_sim/cache/main:/isaac-sim/.cache:rw
+      - /data/world_action_models/isaac_sim/cache/computecache:/isaac-sim/.nv/ComputeCache:rw
+      - /data/world_action_models/isaac_sim/config:/isaac-sim/.nvidia-omniverse/config:rw
+      - /data/world_action_models/isaac_sim/logs:/isaac-sim/.nvidia-omniverse/logs:rw
+      - /data/world_action_models/isaac_sim/data:/isaac-sim/.local/share/ov/data:rw
+      - /data/world_action_models/isaac_sim/assets/unitree_sim_assets/assets:/home/code/unitree_sim_isaaclab/assets:rw
+      - /data/world_action_models/isaac_sim/assets/unitree_sim_assets:/home/code/isaacsim_assets:rw
+
+    # command: sleep infinity
+
+    command: >
+      conda run --no-capture-output -n unitree_sim_env python
+        /home/code/unitree_sim_isaaclab/sim_main.py
+        --device cuda:0
+        --enable_cameras
+        --task Isaac-PickPlace-Cylinder-G129-Dex3-Joint
+        --enable_dex3_dds
+        --robot_type g129
+        --no_render
+        --livestream_type 2
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["0"]
+              capabilities: [gpu, compute, graphics, video, utility]
