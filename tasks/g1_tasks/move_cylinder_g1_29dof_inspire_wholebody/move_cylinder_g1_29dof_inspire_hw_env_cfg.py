@@ -44,7 +44,8 @@ class ObjectTableSceneCfg(TableCylinderSceneCfgWH):
 
     contact_forces = ContactSensorCfg(prim_path="/World/envs/env_.*/Robot/.*", history_length=10, track_air_time=True, debug_vis=False)
     # 6. add camera configuration 
-    front_camera = CameraPresets.g1_front_camera()
+    front_left_camera = CameraPresets.g1_front_left_camera()
+    front_right_camera = CameraPresets.g1_front_right_camera()
     left_wrist_camera = CameraPresets.left_inspire_wrist_camera()
     right_wrist_camera = CameraPresets.right_inspire_wrist_camera()
     robot_camera = CameraPresets.g1_world_camera()

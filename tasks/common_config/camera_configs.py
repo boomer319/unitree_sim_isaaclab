@@ -85,15 +85,85 @@ class CameraPresets:
     
     @classmethod
     def g1_front_camera(cls) -> CameraCfg:
-        """front camera configuration"""
+        """front camera configuration (legacy monocular)"""
         return CameraBaseCfg.get_camera_config()
+
+    @classmethod
+    def g1_front_left_camera(cls) -> CameraCfg:
+        """G1 head left (stereo) camera — same optics as the wrist cameras, +25 mm Y offset"""
+        return CameraBaseCfg.get_camera_config(
+            prim_path="/World/envs/env_.*/front_left_cam",
+            height=480,
+            width=640,
+            update_period=0.02,
+            data_types=["rgb"],
+            focal_length=12.0,
+            focus_distance=400.0,
+            horizontal_aperture=20.0,
+            clipping_range=(0.1, 1.0e5),
+            pos_offset=(0.0, 0.025, 0.0),     # +Y = left eye, ~25 mm stereo baseline
+            rot_offset=(0.5, -0.5, 0.5, -0.5),
+        )
+
+    @classmethod
+    def g1_front_right_camera(cls) -> CameraCfg:
+        """G1 head right (stereo) camera — same optics as the wrist cameras, -25 mm Y offset"""
+        return CameraBaseCfg.get_camera_config(
+            prim_path="/World/envs/env_.*/front_right_cam",
+            height=480,
+            width=640,
+            update_period=0.02,
+            data_types=["rgb"],
+            focal_length=12.0,
+            focus_distance=400.0,
+            horizontal_aperture=20.0,
+            clipping_range=(0.1, 1.0e5),
+            pos_offset=(0.0, -0.025, 0.0),    # -Y = right eye, ~25 mm stereo baseline
+            rot_offset=(0.5, -0.5, 0.5, -0.5),
+        )
+
     @classmethod
     def h12_front_camera(cls) -> CameraCfg:
-        """front camera configuration"""
-        return CameraBaseCfg.get_camera_config(prim_path = "/World/envs/env_.*/Robot/camera_link/front_cam")
+        """front camera configuration (legacy monocular)"""
+        return CameraBaseCfg.get_camera_config(prim_path="/World/envs/env_.*/Robot/camera_link/front_cam")
+
+    @classmethod
+    def h12_front_left_camera(cls) -> CameraCfg:
+        """H1-2 head left (stereo) camera — same optics as the wrist cameras, +25 mm Y offset"""
+        return CameraBaseCfg.get_camera_config(
+            prim_path="/World/envs/env_.*/Robot/camera_link/front_left_cam",
+            height=480,
+            width=640,
+            update_period=0.02,
+            data_types=["rgb"],
+            focal_length=12.0,
+            focus_distance=400.0,
+            horizontal_aperture=20.0,
+            clipping_range=(0.1, 1.0e5),
+            pos_offset=(0.0, 0.025, 0.0),
+            rot_offset=(0.5, -0.5, 0.5, -0.5),
+        )
+
+    @classmethod
+    def h12_front_right_camera(cls) -> CameraCfg:
+        """H1-2 head right (stereo) camera — same optics as the wrist cameras, -25 mm Y offset"""
+        return CameraBaseCfg.get_camera_config(
+            prim_path="/World/envs/env_.*/Robot/camera_link/front_right_cam",
+            height=480,
+            width=640,
+            update_period=0.02,
+            data_types=["rgb"],
+            focal_length=12.0,
+            focus_distance=400.0,
+            horizontal_aperture=20.0,
+            clipping_range=(0.1, 1.0e5),
+            pos_offset=(0.0, -0.025, 0.0),
+            rot_offset=(0.5, -0.5, 0.5, -0.5),
+        )
+
     @classmethod
     def g1_world_camera(cls) -> CameraCfg:
-        """front camera configuration"""
+        """world/overview camera configuration"""
         return CameraBaseCfg.get_camera_config(prim_path="/World/envs/env_.*/Robot/d435_link/PerspectiveCamera_robot",
                                                     pos_offset=(-0.9, 0.0, 0.0),
                                                     rot_offset=( -0.51292,0.51292,-0.48674, 0.48674),
@@ -101,7 +171,7 @@ class CameraPresets:
                                                     horizontal_aperture=27)
     @classmethod
     def h12_world_camera(cls) -> CameraCfg:
-        """front camera configuration"""
+        """world/overview camera configuration"""
         return CameraBaseCfg.get_camera_config(prim_path="/World/envs/env_.*/Robot/camera_link/PerspectiveCamera_robot",
                                                     pos_offset=(-0.9, 0.0, 0.0),
                                                     rot_offset=( -0.51292,0.51292,-0.48674, 0.48674),
@@ -203,4 +273,4 @@ class CameraPresets:
             clipping_range=(0.1, 1.0e5),
             pos_offset=(-0.04012, 0.07441 ,0.15711),
             rot_offset=(0.00539,0.86024,0.0424, 0.50809),
-        ) 
+        )
