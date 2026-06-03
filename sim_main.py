@@ -71,7 +71,7 @@ parser.add_argument("--camera_jpeg", action="store_true", default=True, help="en
 parser.add_argument("--camera_jpeg_quality", type=int, default=85, help="JPEG quality (1-100)")
 
 parser.add_argument("--physx_substeps", type=int, default=None, help="physx substeps per step")
-parser.add_argument("--camera_include", type=str, default="front_camera,left_wrist_camera,right_wrist_camera", help="comma-separated camera names to enable")
+parser.add_argument("--camera_include", type=str, default="front_left_camera,front_right_camera,left_wrist_camera,right_wrist_camera", help="comma-separated camera names to enable")
 parser.add_argument("--camera_exclude", type=str, default="world_camera", help="comma-separated camera names to disable")
 
 parser.add_argument("--env_reward_interval", type=int, default=5, help="environment reward compute interval (steps)")
