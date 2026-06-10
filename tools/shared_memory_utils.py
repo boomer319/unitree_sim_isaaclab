@@ -265,7 +265,11 @@ class MultiImageReader:
 
         try:
             # Concatenate images in order: head, left, right
-            image_order = ['head', 'left', 'right']
+            # Stereo order preferred; fall back to legacy 'head' if stereo not present
+            if 'head_left' in images or 'head_right' in images:
+                image_order = ['head_left', 'head_right', 'left', 'right']
+            else:
+                image_order = ['head', 'left', 'right']
             frames_to_concat = []
 
             for image_name in image_order:
