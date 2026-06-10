@@ -76,11 +76,11 @@ ENV CYCLONEDDS_HOME=/cyclonedds/install
 RUN git clone https://github.com/unitreerobotics/unitree_sdk2_python && \
     cd unitree_sdk2_python && pip install -e .
 
-# Clone unitree_sim_isaaclab
-RUN git clone https://github.com/unitreerobotics/unitree_sim_isaaclab.git /home/code/unitree_sim_isaaclab && \
-    cd /home/code/unitree_sim_isaaclab && git submodule update --init --depth 1 && \
-    cd teleimager && pip install -e . && \
-    cd ../ && pip install -r requirements.txt
+# # Clone unitree_sim_isaaclab
+# RUN git clone https://github.com/unitreerobotics/unitree_sim_isaaclab.git /home/code/unitree_sim_isaaclab && \
+#     cd /home/code/unitree_sim_isaaclab && git submodule update --init --depth 1 && \
+#     cd teleimager && pip install -e . && \
+#     cd ../ && pip install -r requirements.txt
 
 # ==============================
 # Stage 2: Runtime
