@@ -20,6 +20,7 @@ from isaaclab.sensors import ContactSensorCfg
 from . import mdp
 # use Isaac Lab native event system
 
+from isaaclab.sensors import CameraCfg
 from tasks.common_config import  G1RobotPresets, CameraPresets  # isort: skip
 from tasks.common_event.event_manager import SimpleEvent, SimpleEventManager
 
@@ -44,11 +45,11 @@ class ObjectTableSceneCfg(TableCylinderSceneCfgWH):
 
     contact_forces = ContactSensorCfg(prim_path="/World/envs/env_.*/Robot/.*", history_length=10, track_air_time=True, debug_vis=False)
     # 6. add camera configuration 
-    front_left_camera = CameraPresets.g1_front_left_camera()
-    front_right_camera = CameraPresets.g1_front_right_camera()
-    left_wrist_camera = CameraPresets.left_dex3_wrist_camera()
-    right_wrist_camera = CameraPresets.right_dex3_wrist_camera()
-    robot_camera = CameraPresets.g1_world_camera()
+    front_left_camera: CameraCfg = CameraPresets.g1_front_left_camera()
+    front_right_camera: CameraCfg = CameraPresets.g1_front_right_camera()
+    left_wrist_camera: CameraCfg = CameraPresets.left_dex3_wrist_camera()
+    right_wrist_camera: CameraCfg = CameraPresets.right_dex3_wrist_camera()
+    robot_camera: CameraCfg = CameraPresets.g1_world_camera()
 ##
 # MDP settings
 ##
