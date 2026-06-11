@@ -22,6 +22,7 @@ services:
       - /data/world_action_models/isaac_sim/data:/isaac-sim/.local/share/ov/data:rw
       - /data/world_action_models/isaac_sim/assets/unitree_sim_assets/assets:/home/code/unitree_sim_isaaclab/assets:rw
       - /data/world_action_models/isaac_sim/assets/unitree_sim_assets:/home/code/isaacsim_assets:rw
+      - ./:/home/code/unitree_sim_isaaclab:rw
 
     # command: sleep infinity
 

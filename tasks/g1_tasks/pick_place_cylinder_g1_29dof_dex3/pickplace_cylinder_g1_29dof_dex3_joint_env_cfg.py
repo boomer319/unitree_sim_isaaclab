@@ -21,6 +21,7 @@ from isaaclab.utils import configclass
 from . import mdp
 # use Isaac Lab native event system
 
+from isaaclab.sensors import CameraCfg
 from tasks.common_config import  G1RobotPresets, CameraPresets  # isort: skip
 from tasks.common_event.event_manager import SimpleEvent, SimpleEventManager
 
@@ -43,9 +44,10 @@ class ObjectTableSceneCfg(TableCylinderSceneCfg):
     # 5. humanoid robot configuration 
     robot: ArticulationCfg = G1RobotPresets.g1_29dof_dex3_base_fix()
     # 6. add camera configuration 
-    front_camera = CameraPresets.g1_front_camera()
-    left_wrist_camera = CameraPresets.left_dex3_wrist_camera()
-    right_wrist_camera = CameraPresets.right_dex3_wrist_camera()
+    front_left_camera: CameraCfg = CameraPresets.g1_front_left_camera()
+    front_right_camera: CameraCfg = CameraPresets.g1_front_right_camera()
+    left_wrist_camera: CameraCfg = CameraPresets.left_dex3_wrist_camera()
+    right_wrist_camera: CameraCfg = CameraPresets.right_dex3_wrist_camera()
 
 ##
 # MDP settings

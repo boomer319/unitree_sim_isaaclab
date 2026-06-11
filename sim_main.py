@@ -71,7 +71,7 @@ parser.add_argument("--camera_jpeg", action="store_true", default=True, help="en
 parser.add_argument("--camera_jpeg_quality", type=int, default=85, help="JPEG quality (1-100)")
 
 parser.add_argument("--physx_substeps", type=int, default=None, help="physx substeps per step")
-parser.add_argument("--camera_include", type=str, default="front_camera,left_wrist_camera,right_wrist_camera", help="comma-separated camera names to enable")
+parser.add_argument("--camera_include", type=str, default="front_left_camera,front_right_camera,left_wrist_camera,right_wrist_camera", help="comma-separated camera names to enable")
 parser.add_argument("--camera_exclude", type=str, default="world_camera", help="comma-separated camera names to disable")
 
 parser.add_argument("--env_reward_interval", type=int, default=5, help="environment reward compute interval (steps)")
@@ -274,11 +274,16 @@ def main():
                 pass
             try:
                 sensors_dict = getattr(env.scene, "sensors", {})
+                print("[sim] All scene sensors found:", list(sensors_dict.keys()))
+                camera_sensor_names = [name for name in sensors_dict.keys() if "camera" in name.lower()]
+                print("[sim] Camera sensors found:", camera_sensor_names)
+                print(f"[sim] camera_include={include}, camera_exclude={exclude}")
                 for name, sensor in sensors_dict.items():
                     lname = name.lower()
                     if "camera" not in lname:
                         continue
                     if exclude and name in exclude:
+                        print(f"[sim]   -> excluding camera '{name}' (in --camera_exclude)")
                         for attr_name, value in [("enabled", False), ("is_enabled", False)]:
                             if hasattr(sensor, attr_name):
                                 try:
@@ -298,12 +303,15 @@ def main():
                                 except Exception:
                                     pass
                     elif include and name not in include:
+                        print(f"[sim]   -> throttling camera '{name}' (not in --camera_include)")
                         for attr_name in ("update_period", "_update_period"):
                             if hasattr(sensor, attr_name):
                                 try:
                                     setattr(sensor, attr_name, 1e6)
                                 except Exception:
                                     pass
+                    else:
+                        print(f"[sim]   -> camera '{name}' active")
             except Exception as e:
                 print(f"[camera] failed to tune sensors: {e}")
         except Exception as e:
@@ -358,7 +366,23 @@ def main():
         )
     env.sim.reset()
     env.reset()
-    
+
+    try:
+        from pxr import UsdGeom
+        stage = env.scene.sim._stage if hasattr(env.scene.sim, '_stage') else None
+        if stage is None:
+            import omni.usd
+            stage = omni.usd.get_context().get_stage()
+        camera_prims = []
+        for prim in stage.Traverse():
+            if prim.IsValid() and UsdGeom.Camera(prim):
+                camera_prims.append(str(prim.GetPath()))
+        print("[sim] USD Camera prims on stage after reset:")
+        for p in camera_prims:
+            print(f"        {p}")
+    except Exception as e:
+        print(f"[sim] Failed to enumerate USD camera prims: {e}")
+
     # create simplified control configuration
     try:    
         control_config = ControlConfig(
