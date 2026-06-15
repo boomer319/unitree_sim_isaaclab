@@ -92,7 +92,7 @@ class CameraPresets:
     def g1_front_left_camera(cls) -> CameraCfg:
         """G1 head left (stereo) camera — same optics as the wrist cameras, +25 mm Y offset"""
         return CameraBaseCfg.get_camera_config(
-            prim_path="/World/envs/env_.*/Robot/d435_link/front_left_cam",
+            prim_path="/World/envs/env_.*/Robot/d435_link/front_left_camera",
             height=480,
             width=640,
             update_period=0.02,
@@ -109,7 +109,7 @@ class CameraPresets:
     def g1_front_right_camera(cls) -> CameraCfg:
         """G1 head right (stereo) camera — same optics as the wrist cameras, -25 mm Y offset"""
         return CameraBaseCfg.get_camera_config(
-            prim_path="/World/envs/env_.*/Robot/d435_link/front_right_cam",
+            prim_path="/World/envs/env_.*/Robot/d435_link/front_right_camera",
             height=480,
             width=640,
             update_period=0.02,
@@ -131,7 +131,7 @@ class CameraPresets:
     def h12_front_left_camera(cls) -> CameraCfg:
         """H1-2 head left (stereo) camera — same optics as the wrist cameras, +25 mm Y offset"""
         return CameraBaseCfg.get_camera_config(
-            prim_path="/World/envs/env_.*/Robot/camera_link/front_left_cam",
+            prim_path="/World/envs/env_.*/Robot/camera_link/front_left_camera",
             height=480,
             width=640,
             update_period=0.02,
@@ -148,7 +148,7 @@ class CameraPresets:
     def h12_front_right_camera(cls) -> CameraCfg:
         """H1-2 head right (stereo) camera — same optics as the wrist cameras, -25 mm Y offset"""
         return CameraBaseCfg.get_camera_config(
-            prim_path="/World/envs/env_.*/Robot/camera_link/front_right_cam",
+            prim_path="/World/envs/env_.*/Robot/camera_link/front_right_camera",
             height=480,
             width=640,
             update_period=0.02,
