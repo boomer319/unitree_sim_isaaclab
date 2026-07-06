@@ -4,7 +4,11 @@ import torch
 import numpy as np
 import msgpack
 import functools
-import websockets.sync.client
+
+try:
+    from websockets.sync.client import connect as _ws_connect
+except ImportError:
+    from websockets.client import connect as _ws_connect
 
 
 PING_INTERVAL_SECS = 60
@@ -40,10 +44,13 @@ class _DreamZeroClient:
         self._metadata = None
 
     def connect(self):
-        self._ws = websockets.sync.client.connect(
-            self._uri, compression=None, max_size=None,
-            ping_interval=PING_INTERVAL_SECS, ping_timeout=PING_TIMEOUT_SECS,
-        )
+        try:
+            self._ws = _ws_connect(
+                self._uri, compression=None, max_size=None,
+                ping_interval=PING_INTERVAL_SECS, ping_timeout=PING_TIMEOUT_SECS,
+            )
+        except TypeError:
+            self._ws = _ws_connect(self._uri, max_size=None)
         self._metadata = _unpackb(self._ws.recv())
         return self._metadata
 
