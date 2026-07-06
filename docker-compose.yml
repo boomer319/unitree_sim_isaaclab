@@ -36,7 +36,7 @@ services:
         --action_source dreamzero
         --dreamzero_host ${DREAMZERO_HOST:-127.0.0.1}
         --dreamzero_port ${DREAMZERO_PORT:-8000}
-        --dreamzero_prompt ${DREAMZERO_PROMPT:-"pick up the red block"}
+        --dreamzero_prompt "${DREAMZERO_PROMPT:-pick up the red block}"
         --no_render
         --livestream_type 2
 
