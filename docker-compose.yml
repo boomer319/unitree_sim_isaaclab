@@ -32,8 +32,12 @@ services:
         --device cuda:0
         --enable_cameras
         --task Isaac-PickPlace-Cylinder-G129-Dex3-Joint
-        --enable_dex3_dds
+        # --enable_dex3_dds # Used with the web interface
         --robot_type g129
+        --action_source dreamzero
+        --dreamzero_host ${DREAMZERO_HOST:-127.0.0.1}
+        --dreamzero_port ${DREAMZERO_PORT:-8000}
+        --dreamzero_prompt ${DREAMZERO_PROMPT:-"pick up the red block"}
         --no_render
         --livestream_type 2
 

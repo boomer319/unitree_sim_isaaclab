@@ -6,3 +6,5 @@ onnx
 pynput==1.8.1
 aiortc
 aiohttp
+msgpack
+websockets
