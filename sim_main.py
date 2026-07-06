@@ -485,6 +485,7 @@ def main():
         reward_interval = max(1, args_cli.reward_interval)
 
         # use torch.inference_mode() and exception suppression
+        _dreamzero_warned = False
         with contextlib.suppress(KeyboardInterrupt), torch.inference_mode():
             while simulation_app.is_running() and controller.is_running:
                 current_time = time.time()
@@ -495,26 +496,29 @@ def main():
                         env_state_json =  sim_state_to_json(env_state)
                         sim_state = {"init_state":env_state_json,"task_name":args_cli.task}
                     except Exception as e:
-                        print(f"Failed to get env state: {e}")
-                        raise e
+                        print(f"[WARN] Failed to get env state (can be ignored if using dreamzero): {e}")
                     try:
                     # sim_state = json.dumps(sim_state)
                         sim_state_dds.write_sim_state_data(sim_state)
                     except Exception as e:
-                        print(f"Failed to write sim state: {e}")
-                        raise e
+                        if args_cli.action_source == "dreamzero":
+                            pass  # DDS not needed for dreamzero
+                        else:
+                            print(f"[WARN] Failed to write sim state (can be ignored if using dreamzero): {e}")
                     try:
                         reset_pose_cmd = reset_pose_dds.get_reset_pose_command()
                     except Exception as e:
-                        print(f"Failed to get reset pose command: {e}")
-                        raise e
+                        if args_cli.action_source == "dreamzero":
+                            reset_pose_cmd = None
+                        else:
+                            print(f"[WARN] Failed to get reset pose command: {e}")
+                            reset_pose_cmd = None
                     # Compute current reward values manually if needed for debugging
                     try:
                         if (loop_count % reward_interval) == 0:
                             pass
                             # current_reward = get_step_reward_value(env)
                     except Exception as e:
-                        print(f"奖励计算失败: {e}")
                         pass
                     
                     if reset_pose_cmd is not None:
@@ -529,8 +533,21 @@ def main():
                                 env_cfg.event_manager.trigger("reset_all_self", env)
                                 reset_pose_dds.write_reset_pose_command(-1)
                         except Exception as e:
-                            print(f"Failed to write reset pose command: {e}")
-                            raise e
+                            if args_cli.action_source != "dreamzero":
+                                print(f"[WARN] Failed to write reset pose command: {e}")
+                
+                if args_cli.action_source == "dreamzero" and not action_provider._connected:
+                    if not _dreamzero_warned:
+                        print()
+                        print("=" * 60)
+                        print("  ⚠️  DREAMZERO SERVER NOT CONNECTED")
+                        print(f"  Could not reach dreamzero server at {args_cli.dreamzero_host}:{args_cli.dreamzero_port}")
+                        print(f"  Start the server on 141.19.87.242:")
+                        print(f"    docker compose up dreamzero-infer")
+                        print("  Or check network connectivity between the machines.")
+                        print("=" * 60)
+                        print()
+                        _dreamzero_warned = True
                 else:
                     if action_provider.get_start_loop() and data_idx<len(data_json_list):
                         print(f"data_idx: {data_idx}")

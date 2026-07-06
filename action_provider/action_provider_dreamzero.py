@@ -243,7 +243,7 @@ class DreamZeroActionProvider(ActionProvider):
                 return full_action.unsqueeze(0)
 
             if not self._connected:
-                return None
+                return torch.zeros((1, len(self.all_joint_names)), dtype=torch.float32, device=self.env.device)
 
             obs = self._build_observation_dict()
 
