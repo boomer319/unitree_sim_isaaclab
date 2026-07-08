@@ -228,6 +228,9 @@ class DreamZeroActionProvider(ActionProvider):
 
         return obs
 
+    def get_start_loop(self):
+        return False
+
     def get_action(self, env) -> Optional[torch.Tensor]:
         try:
             if self._action_queue:
