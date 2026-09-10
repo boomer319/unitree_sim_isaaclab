@@ -45,6 +45,10 @@ class ActionProvider(ABC):
             self._thread.join(timeout=1.0)
         print(f"[{self.name}] ActionProvider stopped")
     
+    def get_start_loop(self) -> bool:
+        """Whether the main loop should advance to the next replay episode (subclass can override)"""
+        return False
+
     def _run_loop(self):
         """Run loop (subclass can override)"""
         while self.is_running:
