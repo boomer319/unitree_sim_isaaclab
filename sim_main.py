@@ -542,7 +542,7 @@ def main():
                         print("=" * 60)
                         print("  ⚠️  DREAMZERO SERVER NOT CONNECTED")
                         print(f"  Could not reach dreamzero server at {args_cli.dreamzero_host}:{args_cli.dreamzero_port}")
-                        print(f"  Start the server on 141.19.87.242:")
+                        print(f"  Start the server on {args_cli.dreamzero_host}:")
                         print(f"    docker compose up dreamzero-infer")
                         print("  Or check network connectivity between the machines.")
                         print("=" * 60)
