@@ -5,14 +5,9 @@ import numpy as np
 import msgpack
 import functools
 
-try:
-    from websockets.sync.client import connect as _ws_connect
-except ImportError:
-    from websockets.client import connect as _ws_connect
+import zmq
 
-
-PING_INTERVAL_SECS = 60
-PING_TIMEOUT_SECS = 600
+ZMQ_RECV_TIMEOUT_MS = 30_000
 
 
 def _pack_array(obj):
@@ -39,39 +34,35 @@ _unpackb = functools.partial(msgpack.unpackb, object_hook=_unpack_array)
 
 class _DreamZeroClient:
     def __init__(self, host: str, port: int):
-        self._uri = f"ws://{host}:{port}"
-        self._ws = None
+        self._endpoint = f"tcp://{host}:{port}"
+        self._sock = None
+        self._ctx = None
         self._metadata = None
 
     def connect(self):
-        try:
-            self._ws = _ws_connect(
-                self._uri, compression=None, max_size=None,
-                ping_interval=PING_INTERVAL_SECS, ping_timeout=PING_TIMEOUT_SECS,
-            )
-        except TypeError:
-            self._ws = _ws_connect(self._uri, max_size=None)
-        self._metadata = _unpackb(self._ws.recv())
+        self._ctx = zmq.Context.instance()
+        self._sock = self._ctx.socket(zmq.REQ)
+        self._sock.setsockopt(zmq.RCVTIMEO, ZMQ_RECV_TIMEOUT_MS)
+        self._sock.setsockopt(zmq.LINGER, 0)
+        self._sock.connect(self._endpoint)
+        self._sock.send(_packer().pack({"endpoint": "metadata"}))
+        self._metadata = _unpackb(self._sock.recv())
         return self._metadata
 
     def infer(self, obs: dict) -> dict:
-        obs["endpoint"] = "infer"
-        self._ws.send(_packer().pack(obs))
-        response = self._ws.recv()
-        if isinstance(response, str):
-            raise RuntimeError(f"Server error:\n{response}")
-        return _unpackb(response)
-
-    def reset(self, reset_info: dict) -> None:
-        reset_info["endpoint"] = "reset"
-        self._ws.send(_packer().pack(reset_info))
-        response = self._ws.recv()
-        return response
+        msg = dict(obs)
+        msg["endpoint"] = "infer"
+        self._sock.send(_packer().pack(msg))
+        response = self._sock.recv()
+        result = _unpackb(response)
+        if isinstance(result, dict) and "error" in result:
+            raise RuntimeError(f"Server error:\n{result['error']}")
+        return result
 
     def close(self):
-        if self._ws:
+        if self._sock:
             try:
-                self._ws.close()
+                self._sock.close(linger=0)
             except Exception:
                 pass
 

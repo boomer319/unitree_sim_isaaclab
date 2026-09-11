@@ -68,7 +68,7 @@ parser.add_argument("--gravity_z", type=float, default=None, help="override grav
 parser.add_argument("--skip_cvtcolor", action="store_true", default=False, help="skip cv2.cvtColor if upstream already BGR")
 
 parser.add_argument("--dreamzero_host", type=str, default="127.0.0.1", help="DreamZero inference server host")
-parser.add_argument("--dreamzero_port", type=int, default=8000, help="DreamZero inference server port")
+parser.add_argument("--dreamzero_port", type=int, default=5550, help="DreamZero inference server port (ZMQ REQ/REP)")
 parser.add_argument("--dreamzero_prompt", type=str, default="pick up the object", help="Language prompt for DreamZero policy")
 
 parser.add_argument("--camera_jpeg", action="store_true", default=True, help="enable JPEG compression for camera frames")
@@ -724,4 +724,5 @@ if __name__ == "__main__":
 # python sim_main.py --device cpu  --enable_cameras  --task Isaac-PickPlace-RedBlock-H12-27dof-Inspire-Joint  --enable_inspire_dds --robot_type h1_2
 # python sim_main.py --device cpu  --enable_cameras  --task Isaac-Stack-RgyBlock-H12-27dof-Inspire-Joint --enable_inspire_dds --robot_type h1_2
 
-# python sim_main.py --device cpu  --enable_cameras  --task Isaac-PickPlace-Cylinder-G129-Dex3-Joint --robot_type g129 --action_source dreamzero --dreamzero_host 10.0.0.1 --dreamzero_port 8000 --dreamzero_prompt "pick up the red block"
+# python sim_main.py --device cpu  --enable_cameras  --task Isaac-PickPlace-Cylinder-G129-Dex3-Joint --robot_type g129 --action_source dreamzero --dreamzero_host 10.0.0.1 --dreamzero_port 5550 --dreamzero_prompt "pick up the red block"
+# (policy server: dreamzero/socket_test_g1_dex3.py --transport zmq --zmq-port 5550; ZMQ REQ/REP, GR00T convention)
