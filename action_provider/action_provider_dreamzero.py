@@ -4,10 +4,11 @@ import torch
 import numpy as np
 import msgpack
 import functools
+import os
 
 import zmq
 
-ZMQ_RECV_TIMEOUT_MS = 30_000
+ZMQ_RECV_TIMEOUT_MS = int(os.environ.get("DREAMZERO_ZMQ_RECV_TIMEOUT_MS", "300000"))
 
 
 def _pack_array(obj):
@@ -49,15 +50,24 @@ class _DreamZeroClient:
         self._metadata = _unpackb(self._sock.recv())
         return self._metadata
 
-    def infer(self, obs: dict) -> dict:
-        msg = dict(obs)
-        msg["endpoint"] = "infer"
-        self._sock.send(_packer().pack(msg))
+    def _request(self, payload: dict) -> dict:
+        self._sock.send(_packer().pack(payload))
         response = self._sock.recv()
         result = _unpackb(response)
         if isinstance(result, dict) and "error" in result:
             raise RuntimeError(f"Server error:\n{result['error']}")
         return result
+
+    def infer(self, obs: dict) -> dict:
+        msg = dict(obs)
+        msg["endpoint"] = "infer"
+        return self._request(msg)
+
+    def save_video(self) -> dict:
+        return self._request({"endpoint": "save_video"})
+
+    def reset(self) -> dict:
+        return self._request({"endpoint": "reset"})
 
     def close(self):
         if self._sock:
@@ -102,6 +112,9 @@ class DreamZeroActionProvider(ActionProvider):
 
         self._client = None
         self._connected = False
+        self._stop_requested = False
+        self._infer_count = 0
+        self._video_saved = False
 
         self._call_count = 0
         self._action_queue = []
@@ -166,7 +179,27 @@ class DreamZeroActionProvider(ActionProvider):
         super().start()
 
     def stop(self):
+        if self._stop_requested:
+            return
+        self._stop_requested = True
         self._connected = False
+        if self._client and self._infer_count > 0:
+            try:
+                print(f"[{self.name}] Requesting DreamZero save_video ...")
+                save_response = self._client.save_video()
+                print(f"[{self.name}] save_video response: {save_response}")
+                if save_response.get("status") == "saved" and save_response.get("path"):
+                    self._video_saved = True
+                    print(f"[{self.name}] DreamZero video saved: {save_response['path']}")
+                else:
+                    print(f"[{self.name}] DreamZero video not saved: {save_response}")
+            except Exception as e:
+                print(f"[{self.name}] Failed to request DreamZero save_video: {e}")
+            try:
+                reset_response = self._client.reset()
+                print(f"[{self.name}] reset response: {reset_response}")
+            except Exception as e:
+                print(f"[{self.name}] Failed to reset DreamZero: {e}")
         if self._client:
             try:
                 self._client.close()
@@ -239,6 +272,8 @@ class DreamZeroActionProvider(ActionProvider):
             obs = self._build_observation_dict()
 
             action_dict = self._client.infer(obs)
+            self._infer_count += 1
+            print(f"[{self.name}] DreamZero inference #{self._infer_count} complete")
 
             action_keys = sorted([k for k in action_dict.keys() if k.startswith("action.")])
             if action_keys:
