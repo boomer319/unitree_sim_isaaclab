@@ -78,6 +78,13 @@ class _DreamZeroClient:
 
 
 class DreamZeroActionProvider(ActionProvider):
+    _ACTION_CHUNK_KEYS = (
+        "action.left_arm_pos",
+        "action.right_arm_pos",
+        "action.left_hand_pos",
+        "action.right_hand_pos",
+    )
+
     def __init__(self, env, args_cli):
         super().__init__("DreamZeroActionProvider")
         self.env = env
@@ -252,6 +259,20 @@ class DreamZeroActionProvider(ActionProvider):
 
         return obs
 
+    def _action_dict_to_28dim(self, action_dict: dict) -> np.ndarray:
+        missing = [key for key in self._ACTION_CHUNK_KEYS if key not in action_dict]
+        if missing:
+            raise ValueError(f"DreamZero action response missing keys: {missing}")
+        arrays = []
+        for key in self._ACTION_CHUNK_KEYS:
+            arr = np.asarray(action_dict[key], dtype=np.float32)
+            arr = arr.reshape(1, -1) if arr.ndim == 1 else arr.reshape(-1, 7)
+            arrays.append(arr)
+        horizon = arrays[0].shape[0]
+        if any(arr.shape != (horizon, 7) for arr in arrays):
+            raise ValueError(f"DreamZero action chunk shape mismatch: {[arr.shape for arr in arrays]}")
+        return np.concatenate(arrays, axis=1)
+
     def get_action(self, env) -> Optional[torch.Tensor]:
         try:
             if self._action_queue:
@@ -275,27 +296,7 @@ class DreamZeroActionProvider(ActionProvider):
             self._infer_count += 1
             print(f"[{self.name}] DreamZero inference #{self._infer_count} complete")
 
-            action_keys = sorted([k for k in action_dict.keys() if k.startswith("action.")])
-            if action_keys:
-                horizon = None
-                chunks = []
-                for key in action_keys:
-                    val = action_dict[key]
-                    if isinstance(val, np.ndarray):
-                        if val.ndim == 2:
-                            if horizon is None:
-                                horizon = val.shape[0]
-                            chunks.append(val)
-                        elif val.ndim == 1:
-                            if horizon is None:
-                                horizon = 1
-                            chunks.append(val.reshape(1, -1))
-                if chunks:
-                    action_chunk = np.concatenate(chunks, axis=1)
-                else:
-                    action_chunk = np.zeros((24, 28), dtype=np.float32)
-            else:
-                action_chunk = np.zeros((24, 28), dtype=np.float32)
+            action_chunk = self._action_dict_to_28dim(action_dict)
 
             if len(action_chunk) > 0:
                 action_chunk_list = [action_chunk[i] for i in range(len(action_chunk))]
